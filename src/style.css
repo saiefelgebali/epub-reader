@@ -1,5 +1,5 @@
 body {
-	font-family: "Times New Roman", Times, serif, sans-serif;
+	font-family: "EB Garamond", serif;
 	max-width: 65ch;
 	margin: 0 auto;
 	min-height: 100vh;
@@ -17,8 +17,8 @@ image {
 	padding: 2rem;
 	min-height: 100vh;
 
-	background-color: hsl(0, 0%, 20%);
-	color: white;
+	/* background-color: hsl(0, 0%, 15%); */
+	color: hsl(0, 0%, 90%);
 
 	line-height: 1.5;
 }
