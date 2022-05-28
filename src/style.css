@@ -1,0 +1,27 @@
+body {
+	font-family: "Times New Roman", Times, serif, sans-serif;
+	max-width: 65ch;
+	margin: 0 auto;
+	min-height: 100vh;
+	font-size: 20px;
+	background-color: hsl(0, 0%, 10%);
+}
+
+img,
+image {
+	max-width: 100%;
+}
+
+.page {
+	margin: 1rem 0rem;
+	padding: 2rem;
+	min-height: 100vh;
+
+	background-color: hsl(0, 0%, 20%);
+	color: white;
+
+	line-height: 1.5;
+}
+.page a {
+	color: white;
+}
