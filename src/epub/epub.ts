@@ -1,13 +1,33 @@
 import * as zip from "@zip.js/zip.js";
+import { db } from "../db";
 import { EpubFile, EpubFileSystem } from "./epub.file.system";
 import { Spine } from "./epub.manifest";
+import { v4 as uuidv4 } from "uuid";
 
 export class Epub {
 	constructor(
+		public id: string,
 		public fileSystem: EpubFileSystem,
 		public spine: Spine,
 		public coverImage?: EpubFile | null
-	) {}
+	) {
+		console.log(fileSystem);
+	}
+
+	public static fromObject({
+		id,
+		fileSystem,
+		spine,
+		coverImage,
+	}: {
+		id: string;
+		fileSystem: EpubFileSystem;
+		spine: Spine;
+		coverImage: EpubFile | null;
+	}) {
+		const book = new Epub(id, fileSystem, spine, coverImage);
+		return book;
+	}
 
 	public static async fromFile(epub: File) {
 		// unzip the epub
@@ -40,30 +60,27 @@ export class Epub {
 		// extract the spine
 		const spine = Spine.fromDocument(opfDoc);
 
-		// Get the cover image from the guide
-		const guide = opfDoc.querySelector("guide");
-		if (!guide) throw new Error("No guide found");
-		const cover = guide.querySelector("reference[type='cover']");
-		let coverImage: EpubFile | null = null;
-		if (cover) {
-			const coverHref = cover.getAttribute("href");
-			if (coverHref) {
-				const coverFile = await fileSystem.getFile(coverHref);
-				const coverDoc = await coverFile.getDocument();
-				const coverImageSrc =
-					coverDoc.querySelector("img")?.getAttribute("src") ||
-					coverDoc
-						.querySelector("image")
-						?.getAttribute("xlink:href") ||
-					null;
-				if (!coverImageSrc)
-					throw new Error("Could not find cover image src");
-				coverImage = await fileSystem.getFile(coverImageSrc);
-			}
-		}
+		// Get the cover image from first spine item
+		const coverPageHref = spine.items[0].href;
+		const coverPageFile = await fileSystem.getFile(coverPageHref);
+		const coverPageDoc = await coverPageFile.getDocument();
+		const coverImageSrc =
+			coverPageDoc.querySelector("img")?.getAttribute("src") ||
+			coverPageDoc.querySelector("image")?.getAttribute("xlink:href") ||
+			null;
+		if (!coverImageSrc) throw new Error("Could not find cover image src");
+		const coverImage = await fileSystem.getFile(coverImageSrc);
+
+		const id = uuidv4();
+		const book = new Epub(id, fileSystem, spine, coverImage);
+
+		await db.books.add({
+			id,
+			book,
+		});
 
 		// return the epub
-		return new Epub(fileSystem, spine, coverImage);
+		return book;
 	}
 
 	private async populateDomImages(doc: Document) {
@@ -90,7 +107,9 @@ export class Epub {
 	}
 
 	private async populateDomLinks(doc: Document) {
-		const links = Array.from(doc.querySelectorAll("a[href]"));
+		const links = Array.from(
+			doc.querySelectorAll<HTMLLinkElement>("a[href]")
+		);
 
 		// For each link in the document, find its target.
 		// If it is an internal link, find the target dom element
@@ -112,9 +131,14 @@ export class Epub {
 			// If there is a hash, try to find the target element
 			if (hash) {
 				try {
-					const target = doc.querySelector(`#${hash}`);
+					const target = doc.getElementById(hash);
 					if (target) {
-						return link.setAttribute("href", `#${target.id}`);
+						link.setAttribute("href", `#${target.id}`);
+						link.onclick = (e) => {
+							e.preventDefault();
+							window.location.hash = target.id;
+						};
+						return;
 					}
 				} catch {
 					// ignore
@@ -124,8 +148,15 @@ export class Epub {
 			// If the hash is not found, try find the target file
 			try {
 				const file = await this.fileSystem.getFile(path);
-				return link.setAttribute("href", `#${file.path}`);
-			} catch {
+				const target = doc.getElementById(file.path);
+				if (!target) return;
+				link.setAttribute("href", `#${file.path}`);
+				link.onclick = (e) => {
+					e.preventDefault();
+					window.location.hash = file.path;
+				};
+				return;
+			} catch (e) {
 				// file not found
 				console.log("Could not find file", path);
 				return;
@@ -152,7 +183,7 @@ export class Epub {
 		return pageElement;
 	}
 
-	public async renderTo(element: Node) {
+	public async getHTMLNode() {
 		const root = document.createDocumentFragment().getRootNode();
 		// render the book
 		for (let i = 0; i < this.spine.items.length; i++) {
@@ -163,6 +194,11 @@ export class Epub {
 		// populate the dom links
 		await this.populateDomLinks(root as Document);
 
+		return root;
+	}
+
+	public async renderTo(element: Node) {
+		const root = await this.getHTMLNode();
 		element.appendChild(root);
 	}
 }

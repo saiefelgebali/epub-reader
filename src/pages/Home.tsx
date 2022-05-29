@@ -1,11 +1,12 @@
 import { Link } from "solid-app-router";
-import { Component, createMemo, createSignal, For } from "solid-js";
+import { Component, createMemo, For } from "solid-js";
 import { Epub } from "../epub/epub";
+import { books, setBooks } from "../store";
 
 const BookPreview: Component<{ book: Epub }> = ({ book }) => {
 	const coverImageSrc = createMemo(() => book.coverImage?.getURL(), [book]);
 	return (
-		<Link href='/book/1'>
+		<Link href={`/book/${book.id}`}>
 			<img
 				class='w-full rounded-lg shadow-md shadow-background-900'
 				src={coverImageSrc()}
@@ -16,8 +17,6 @@ const BookPreview: Component<{ book: Epub }> = ({ book }) => {
 };
 
 const Home = () => {
-	const [books, setBooks] = createSignal<Epub[]>([]);
-
 	async function handleAddBook(e: Event) {
 		e.preventDefault();
 		const target = e.target as HTMLInputElement;

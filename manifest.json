@@ -2,6 +2,8 @@
 	"name": "Readbali",
 	"short_name": "Readbali",
 	"start_url": "/",
+	"theme_color": "#21252C",
+	"background_color": "#21252C",
 
 	"display": "standalone",
 	"icons": [
