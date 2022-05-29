@@ -40,7 +40,7 @@ export class EpubFileSystem {
 	}
 }
 
-class EpubFile {
+export class EpubFile {
 	private url?: string;
 	constructor(public path: string, public blob: Blob) {}
 

@@ -2,17 +2,14 @@
 <html lang="en" class="dark scroll-smooth">
 	<head>
 		<meta charset="UTF-8" />
-		<link rel="icon" type="image/svg+xml" href="favicon.svg" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<title>Readbali</title>
 
-		<script type="module" src="/src/main.ts" defer></script>
-		<link rel="stylesheet" href="./dist/tailwind.css" />
+		<!-- Solid JS -->
+		<script type="module" src="/src/index.tsx" defer></script>
 
-		<link rel="icon" href="/static/icon.svg" type="image/svg+xml" />
-		<link rel="apple-touch-icon" href="/static/icon180.png" />
-		<!-- PWA -->
-		<link rel="manifest" href="manifest.json" />
+		<!-- Tailwind -->
+		<link rel="stylesheet" href="./dist/index.css" />
 
 		<!-- Fonts -->
 		<link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -21,9 +18,13 @@
 			href="https://fonts.googleapis.com/css2?family=EB+Garamond&display=swap"
 			rel="stylesheet"
 		/>
+
+		<!-- PWA -->
+		<link rel="icon" href="/src/icon.svg" type="image/svg+xml" />
+		<link rel="manifest" href="manifest.json" />
+		<link rel="apple-touch-icon" href="/src/assets/icon180.png" />
 	</head>
 	<body>
-		<input id="file-select" type="file" />
-		<div id="book-container" class="container"></div>
+		<div id="root"></div>
 	</body>
 </html>

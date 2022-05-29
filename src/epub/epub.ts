@@ -1,9 +1,13 @@
 import * as zip from "@zip.js/zip.js";
-import { EpubFileSystem } from "./epub.file.system";
+import { EpubFile, EpubFileSystem } from "./epub.file.system";
 import { Spine } from "./epub.manifest";
 
 export class Epub {
-	constructor(public fileSystem: EpubFileSystem, public spine: Spine) {}
+	constructor(
+		public fileSystem: EpubFileSystem,
+		public spine: Spine,
+		public coverImage?: EpubFile | null
+	) {}
 
 	public static async fromFile(epub: File) {
 		// unzip the epub
@@ -36,8 +40,30 @@ export class Epub {
 		// extract the spine
 		const spine = Spine.fromDocument(opfDoc);
 
+		// Get the cover image from the guide
+		const guide = opfDoc.querySelector("guide");
+		if (!guide) throw new Error("No guide found");
+		const cover = guide.querySelector("reference[type='cover']");
+		let coverImage: EpubFile | null = null;
+		if (cover) {
+			const coverHref = cover.getAttribute("href");
+			if (coverHref) {
+				const coverFile = await fileSystem.getFile(coverHref);
+				const coverDoc = await coverFile.getDocument();
+				const coverImageSrc =
+					coverDoc.querySelector("img")?.getAttribute("src") ||
+					coverDoc
+						.querySelector("image")
+						?.getAttribute("xlink:href") ||
+					null;
+				if (!coverImageSrc)
+					throw new Error("Could not find cover image src");
+				coverImage = await fileSystem.getFile(coverImageSrc);
+			}
+		}
+
 		// return the epub
-		return new Epub(fileSystem, spine);
+		return new Epub(fileSystem, spine, coverImage);
 	}
 
 	private async populateDomImages(doc: Document) {

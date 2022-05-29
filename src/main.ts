@@ -1,4 +1,4 @@
-import { Epub } from "./epub";
+import { Epub } from "./epub/epub";
 import { setupFileSelect } from "./file-select";
 import "./style.css";
 
