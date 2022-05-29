@@ -1,27 +1,13 @@
-body {
-	font-family: "EB Garamond", serif;
-	max-width: 65ch;
-	margin: 0 auto;
-	min-height: 100vh;
-	font-size: 20px;
-	background-color: hsl(0, 0%, 10%);
-}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-img,
-image {
-	max-width: 100%;
+body {
+	@apply mx-auto max-w-xl 
+	bg-gray-50
+	dark:bg-gray-900;
 }
 
 .page {
-	margin: 1rem 0rem;
-	padding: 2rem;
-	min-height: 100vh;
-
-	/* background-color: hsl(0, 0%, 15%); */
-	color: hsl(0, 0%, 90%);
-
-	line-height: 1.5;
-}
-.page a {
-	color: white;
+	@apply p-4 prose dark:prose-invert;
 }

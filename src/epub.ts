@@ -63,6 +63,50 @@ export class Epub {
 		return doc;
 	}
 
+	private async populateDomLinks(doc: Document) {
+		const links = Array.from(doc.querySelectorAll("a[href]"));
+
+		// For each link in the document, find its target.
+		// If it is an internal link, find the target dom element
+		// and point to it
+		links.forEach(async (link) => {
+			const href = link.getAttribute("href");
+			if (!href) return;
+
+			// ignore absolute url
+			if (href.indexOf("://") > -1) return;
+
+			// ignore fragment
+			if (href.indexOf("#") === 0) return;
+
+			const hrefParts = href.split("#");
+			const path = hrefParts[0];
+			const hash = hrefParts.length > 1 ? hrefParts[1] : null;
+
+			// If there is a hash, try to find the target element
+			if (hash) {
+				try {
+					const target = doc.querySelector(`#${hash}`);
+					if (target) {
+						return link.setAttribute("href", `#${target.id}`);
+					}
+				} catch {
+					// ignore
+				}
+			}
+
+			// If the hash is not found, try find the target file
+			try {
+				const file = await this.fileSystem.getFile(path);
+				return link.setAttribute("href", `#${file.path}`);
+			} catch {
+				// file not found
+				console.log("Could not find file", path);
+				return;
+			}
+		});
+	}
+
 	public async getSpineEntryHTML(index: number): Promise<Node> {
 		const spineItem = this.spine.items[index];
 		if (!spineItem) throw new Error("Invalid spine index");
@@ -71,11 +115,28 @@ export class Epub {
 
 		const file = await this.fileSystem.getFile(itemPath);
 		const doc = await file.getDocument();
-		await this.populateDomImages(doc);
+
+		// populate images in the element
+		await this.populateDomImages(doc as Document);
 
 		const pageElement = document.createElement("div");
 		pageElement.classList.add("page");
+		pageElement.id = file.path;
 		pageElement.append(...Array.from(doc.body.childNodes));
 		return pageElement;
+	}
+
+	public async renderTo(element: Node) {
+		const root = document.createDocumentFragment().getRootNode();
+		// render the book
+		for (let i = 0; i < this.spine.items.length; i++) {
+			const page = await this.getSpineEntryHTML(i);
+			root.appendChild(page);
+		}
+
+		// populate the dom links
+		await this.populateDomLinks(root as Document);
+
+		element.appendChild(root);
 	}
 }
