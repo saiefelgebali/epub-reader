@@ -1,13 +1,18 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en" class="dark scroll-smooth">
 	<head>
 		<meta charset="UTF-8" />
 		<link rel="icon" type="image/svg+xml" href="favicon.svg" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>Vite App</title>
+		<title>Readbali</title>
 
 		<script type="module" src="/src/main.ts" defer></script>
 		<link rel="stylesheet" href="./dist/tailwind.css" />
+
+		<link rel="icon" href="/static/icon.svg" type="image/svg+xml" />
+		<link rel="apple-touch-icon" href="/static/icon180.png" />
+		<!-- PWA -->
+		<link rel="manifest" href="manifest.json" />
 
 		<!-- Fonts -->
 		<link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -19,6 +24,6 @@
 	</head>
 	<body>
 		<input id="file-select" type="file" />
-		<div id="book-container"></div>
+		<div id="book-container" class="container"></div>
 	</body>
 </html>
