@@ -10,17 +10,6 @@ class ReadbaliDexie extends Dexie {
 			books: "id, lastRead",
 		});
 	}
-
-	async getBooks(
-		offset: number = 0,
-		limit: number = 10
-	): Promise<BookEntity[]> {
-		return await this.books
-			.orderBy("lastRead")
-			.offset(offset)
-			.limit(limit)
-			.toArray();
-	}
 }
 
 export const db = new ReadbaliDexie();

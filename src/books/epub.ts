@@ -4,7 +4,6 @@ import { EpubFile, EpubFileSystem } from "./epub.file.system";
 import { Spine } from "./epub.manifest";
 import { v4 as uuidv4 } from "uuid";
 import { BookEntity } from "../db/book.entity";
-import { IndexableType } from "dexie";
 
 export class Epub {
 	constructor(
@@ -96,8 +95,7 @@ export class Epub {
 	public async save() {
 		const entity: BookEntity = {
 			id: this.id,
-			title: this.metadata.title,
-			author: this.metadata.author,
+			metadata: this.metadata,
 			coverImage: {
 				buffer: await this.coverImage.blob.arrayBuffer(),
 				type: this.coverImage.blob.type,
@@ -107,6 +105,7 @@ export class Epub {
 				type: this.file.type,
 			},
 			lastRead: new Date(),
+			type: "epub",
 		};
 
 		await db.books.add(entity);
@@ -165,10 +164,10 @@ export class Epub {
 					const target = doc.getElementById(hash);
 					if (target) {
 						link.setAttribute("href", `#${target.id}`);
-						link.onclick = (e) => {
+						link.addEventListener("click", (e) => {
 							e.preventDefault();
 							window.location.hash = target.id;
-						};
+						});
 						return;
 					}
 				} catch {
@@ -182,10 +181,10 @@ export class Epub {
 				const target = doc.getElementById(file.path);
 				if (!target) return;
 				link.setAttribute("href", `#${file.path}`);
-				link.onclick = (e) => {
+				link.addEventListener("click", (e) => {
 					e.preventDefault();
 					window.location.hash = file.path;
-				};
+				});
 				return;
 			} catch (e) {
 				// file not found
@@ -208,16 +207,18 @@ export class Epub {
 		await this.populateDomImages(doc as Document);
 
 		const pageElement = document.createElement("div");
-		pageElement.classList.add("page");
+		pageElement.classList.add("chapter");
 		pageElement.id = file.path;
 		pageElement.append(...Array.from(doc.body.childNodes));
 		return pageElement;
 	}
 
-	public async getHTMLNode() {
+	public async getHTMLElement() {
 		const root = document.createDocumentFragment().getRootNode();
-		// render the book
-		for (let i = 0; i < this.spine.items.length; i++) {
+
+		// Render each sections in the book
+		// Skip the cover page
+		for (let i = 1; i < this.spine.items.length; i++) {
 			const page = await this.getSpineEntryHTML(i);
 			root.appendChild(page);
 		}
@@ -225,13 +226,17 @@ export class Epub {
 		// populate the dom links
 		await this.populateDomLinks(root as Document);
 
+		const bookHtml = document.createElement("div");
+		bookHtml.classList.add("book");
+		bookHtml.append(...root.childNodes);
+
 		// TODO: update lastRead
 
-		return root;
+		return bookHtml;
 	}
 
 	public async renderTo(element: Node) {
-		const root = await this.getHTMLNode();
+		const root = await this.getHTMLElement();
 		element.appendChild(root);
 	}
 }
