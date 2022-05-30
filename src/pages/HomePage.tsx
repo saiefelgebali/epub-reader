@@ -45,14 +45,13 @@ const HomePage = () => {
 				</nav>
 			</header>
 
-			<button
-				onclick={() =>
-					document.querySelector("html")?.classList.toggle("dark")
-				}>
-				Toggle
-			</button>
-
 			<main class='container py-8'>
+				<button
+					onclick={() =>
+						document.querySelector("html")?.classList.toggle("dark")
+					}>
+					Toggle
+				</button>
 				<h1 class='text-4xl font-bold mb-8'>Books</h1>
 				<button
 					class='mb-8'

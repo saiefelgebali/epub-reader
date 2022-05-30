@@ -8,6 +8,7 @@ const App = () => {
 		<Router>
 			<Routes>
 				<Route path='/' component={HomePage} />
+				<Route path='/home' component={HomePage} />
 				<Route path='/book/:id' component={BookPage} />
 				<Route path='/settings' component={SettingsPage} />
 			</Routes>
