@@ -1,5 +1,5 @@
 import Dexie, { Table } from "dexie";
-import { Epub } from "./epub/epub";
+import { Epub } from "./books/epub/epub";
 
 export interface Book {
 	id: string;

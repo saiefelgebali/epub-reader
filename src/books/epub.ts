@@ -10,24 +10,7 @@ export class Epub {
 		public fileSystem: EpubFileSystem,
 		public spine: Spine,
 		public coverImage?: EpubFile | null
-	) {
-		console.log(fileSystem);
-	}
-
-	public static fromObject({
-		id,
-		fileSystem,
-		spine,
-		coverImage,
-	}: {
-		id: string;
-		fileSystem: EpubFileSystem;
-		spine: Spine;
-		coverImage: EpubFile | null;
-	}) {
-		const book = new Epub(id, fileSystem, spine, coverImage);
-		return book;
-	}
+	) {}
 
 	public static async fromFile(epub: File) {
 		// unzip the epub

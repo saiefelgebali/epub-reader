@@ -1,0 +1,7 @@
+Phase 1
+[ ] Save books to IndexedDB database
+[ ] Web workers for book parsing tasks
+[ ] Service worker for offline mode
+
+Phase 2
+[ ] Handle PDF files

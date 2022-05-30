@@ -9,13 +9,14 @@ const Book = () => {
 	const getBookNode = createMemo(async () => {
 		const book = books().find((book) => book.id === id);
 		return await book?.getHTMLNode();
-	}, [bookContainer, id]);
+	});
 
 	createEffect(async () => {
-		console.log(bookContainer);
 		if (!bookContainer) return;
+
 		const bookNode = await getBookNode();
 		if (!bookNode) return;
+
 		bookContainer.appendChild(bookNode);
 	}, [bookContainer]);
 

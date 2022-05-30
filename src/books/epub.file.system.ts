@@ -14,6 +14,14 @@ export class EpubFileSystem {
 		return new EpubFileSystem(files);
 	}
 
+	static fromBlobTable(table: { [path: string]: Blob }): EpubFileSystem {
+		const files = Object.entries(table).map(([path, blob]) =>
+			EpubFile.fromBlob(path, blob)
+		);
+
+		return new EpubFileSystem(files);
+	}
+
 	async getFile(path: string): Promise<EpubFile> {
 		// Handle relative paths
 		const splitPath = path.split("/").map((p) => {
@@ -51,6 +59,10 @@ export class EpubFile {
 		const writer = new zip.BlobWriter();
 		const blob = await entry.getData(writer);
 		const path = entry.filename;
+		return new EpubFile(path, blob);
+	}
+
+	static fromBlob(path: string, blob: Blob) {
 		return new EpubFile(path, blob);
 	}
 

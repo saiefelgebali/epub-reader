@@ -1,6 +1,6 @@
 import { Link } from "solid-app-router";
 import { Component, createMemo, For } from "solid-js";
-import { Epub } from "../epub/epub";
+import { Epub } from "../books/epub";
 import { books, setBooks } from "../store";
 
 const BookPreview: Component<{ book: Epub }> = ({ book }) => {
@@ -28,7 +28,7 @@ const Home = () => {
 
 	return (
 		<div>
-			<header class='shadow-md shadow-background-900'>
+			<header class='bg-background-800 shadow-md shadow-background-800 sticky top-0'>
 				<nav class='container flex justify-between items-center py-6'>
 					<a href='/' class='font-bold'>
 						Readbali
