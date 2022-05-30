@@ -1,18 +1,22 @@
 import * as zip from "@zip.js/zip.js";
-import { db } from "../db";
+import { db } from "../db/db";
 import { EpubFile, EpubFileSystem } from "./epub.file.system";
 import { Spine } from "./epub.manifest";
 import { v4 as uuidv4 } from "uuid";
+import { BookEntity } from "../db/book.entity";
+import { IndexableType } from "dexie";
 
 export class Epub {
 	constructor(
 		public id: string,
+		public file: Blob,
+		public metadata: any,
 		public fileSystem: EpubFileSystem,
 		public spine: Spine,
-		public coverImage?: EpubFile | null
+		public coverImage: EpubFile
 	) {}
 
-	public static async fromFile(epub: File) {
+	public static async fromBlob(epub: Blob) {
 		// unzip the epub
 		const epubBlob = new zip.BlobReader(epub);
 		const zipReader = new zip.ZipReader(epubBlob);
@@ -54,16 +58,60 @@ export class Epub {
 		if (!coverImageSrc) throw new Error("Could not find cover image src");
 		const coverImage = await fileSystem.getFile(coverImageSrc);
 
+		// Get meta data
+		const metadataEl = opfDoc.querySelector("metadata");
+		if (!metadataEl) throw new Error("Invalid opf: No metadata");
+
+		const metadata = {
+			title:
+				metadataEl.getElementsByTagName("dc:title")[0]?.textContent ||
+				"",
+			author:
+				metadataEl.getElementsByTagName("dc:creator")[0]?.textContent ||
+				"",
+			publisher:
+				metadataEl.getElementsByTagName("dc:publisher")[0]
+					?.textContent || "",
+			date:
+				metadataEl.getElementsByTagName("dc:date")[0]?.textContent ||
+				"",
+			identifier:
+				metadataEl.getElementsByTagName("dc:identifier")[0]
+					?.textContent || "",
+		};
 		const id = uuidv4();
-		const book = new Epub(id, fileSystem, spine, coverImage);
-
-		await db.books.add({
+		const book = new Epub(
 			id,
-			book,
-		});
+			epub,
+			metadata,
+			fileSystem,
+			spine,
+			coverImage
+		);
 
-		// return the epub
+		// return the entity
 		return book;
+	}
+
+	public async save() {
+		const entity: BookEntity = {
+			id: this.id,
+			title: this.metadata.title,
+			author: this.metadata.author,
+			coverImage: {
+				buffer: await this.coverImage.blob.arrayBuffer(),
+				type: this.coverImage.blob.type,
+			},
+			file: {
+				buffer: await this.file.arrayBuffer(),
+				type: this.file.type,
+			},
+			lastRead: new Date(),
+		};
+
+		await db.books.add(entity);
+
+		return entity;
 	}
 
 	private async populateDomImages(doc: Document) {
@@ -176,6 +224,8 @@ export class Epub {
 
 		// populate the dom links
 		await this.populateDomLinks(root as Document);
+
+		// TODO: update lastRead
 
 		return root;
 	}

@@ -1,3 +1,7 @@
+Current
+[ ] Refactor code to decouple components (Use book objects in their simplest form)
+[ ] Updating lastRead every time a book is opened
+
 Phase 1
 [ ] Save books to IndexedDB database
 [ ] Web workers for book parsing tasks
