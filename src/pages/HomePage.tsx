@@ -38,21 +38,8 @@ const HomePage = () => {
 			<Header />
 
 			<Main styles='pt-4'>
-				<button
-					onclick={() =>
-						document.querySelector("html")?.classList.toggle("dark")
-					}>
-					Toggle
-				</button>
 				<h1 class='text-4xl font-bold mb-8'>Books</h1>
-				<button
-					class='mb-8'
-					onclick={() => {
-						db.books.clear();
-						setBooks({});
-					}}>
-					Clear Database
-				</button>
+
 				<div class='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 items-end'>
 					<For each={Object.values(books())}>
 						{(book) => <BookPreview book={book} />}
