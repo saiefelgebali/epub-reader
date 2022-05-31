@@ -2,6 +2,8 @@ import nProgress from "nprogress";
 import { Link, useParams } from "solid-app-router";
 import { createEffect, createSignal } from "solid-js";
 import { Epub } from "../books/epub";
+import Header from "../components/Header";
+import Main from "../components/Main";
 import { Book } from "../db/book.entity";
 import { db } from "../db/db";
 import { books } from "../store";
@@ -45,22 +47,15 @@ const BookPage = () => {
 
 	return (
 		<>
-			<main class='max-w-xl mx-auto'>
+			<Header />
+			<Main styles='max-w-xl'>
 				{book() && (
 					<div class='w-full min-h-screen flex items-center'>
 						<img src={book().coverImageUrl}></img>
 					</div>
 				)}
 				<div ref={containerRef}></div>
-			</main>
-			<header class='bg-gray-50  dark:bg-background-800 border-t dark:border-background-900 transition-colors fixed left-0 right-0 bottom-0'>
-				<nav class='container flex justify-between items-center py-6'>
-					<Link href='/home' class='font-bold'>
-						Readbali
-					</Link>
-					<Link href='/settings'>Settings</Link>
-				</nav>
-			</header>
+			</Main>
 		</>
 	);
 };

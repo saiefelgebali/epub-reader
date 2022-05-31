@@ -1,6 +1,8 @@
 import { Link } from "solid-app-router";
 import { Component, For } from "solid-js";
 import { Epub } from "../books/epub";
+import Header from "../components/Header";
+import Main from "../components/Main";
 import { Book } from "../db/book.entity";
 import { db } from "../db/db";
 import { books, setBooks } from "../store";
@@ -33,19 +35,9 @@ const HomePage = () => {
 
 	return (
 		<div>
-			<header class='bg-gray-50  dark:bg-background-800 border-b dark:border-background-900 sticky top-0 transition-colors'>
-				<nav class='container flex justify-between items-center py-6'>
-					<a
-						href='/'
-						onclick={() => window.location.reload()}
-						class='font-bold'>
-						Readbali
-					</a>
-					<Link href='/settings'>Settings</Link>
-				</nav>
-			</header>
+			<Header />
 
-			<main class='container py-8'>
+			<Main styles='pt-4'>
 				<button
 					onclick={() =>
 						document.querySelector("html")?.classList.toggle("dark")
@@ -81,7 +73,7 @@ const HomePage = () => {
 						/>
 					</label>
 				</div>
-			</main>
+			</Main>
 		</div>
 	);
 };

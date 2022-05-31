@@ -12,7 +12,11 @@ body {
 }
 
 .chapter {
-	@apply min-h-screen p-4 mx-auto max-w-xl
+	@apply min-h-screen p-4
 	prose prose-xl dark:prose-invert;
 	word-wrap: break-word;
+}
+
+:target {
+	padding-top: 4rem;
 }
