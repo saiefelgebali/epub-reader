@@ -1,39 +1,30 @@
-import * as zip from "@zip.js/zip.js";
+import { BlobWriter, Entry } from "@zip.js/zip.js";
 
 export class EpubFileSystem {
 	private fileMap: Map<string, EpubFile> = new Map();
+
 	constructor(public files: EpubFile[]) {
 		files.forEach((f) => {
 			this.fileMap.set(f.path, f);
 		});
 	}
 
-	static async fromZipEntries(entries: zip.Entry[]): Promise<EpubFileSystem> {
+	static async fromZipEntries(entries: Entry[]): Promise<EpubFileSystem> {
 		const fileEntries = entries.filter((e) => !e.directory);
 		const files = await Promise.all(fileEntries.map(EpubFile.fromZipEntry));
 		return new EpubFileSystem(files);
 	}
 
-	static fromBlobTable(table: { [path: string]: Blob }): EpubFileSystem {
-		const files = Object.entries(table).map(([path, blob]) =>
-			EpubFile.fromBlob(path, blob)
-		);
-
-		return new EpubFileSystem(files);
-	}
-
 	async getFile(path: string): Promise<EpubFile> {
 		// Handle relative paths
-		const splitPath = path.split("/").map((p) => {
-			if (p === ".." || p === ".") {
-				return "";
-			}
-			return p;
-		});
-		const joinedPath = splitPath.join("/");
-		const parsedPath = joinedPath.startsWith("/")
-			? joinedPath.slice(1)
-			: joinedPath;
+		const nonRelativePath = path
+			.split("/")
+			.map((p) => (p === ".." || p === "." ? "" : p))
+			.join("/");
+
+		const parsedPath = nonRelativePath.startsWith("/")
+			? nonRelativePath.slice(1)
+			: nonRelativePath;
 
 		// Try to find the file in the map
 		let file = this.fileMap.get(parsedPath);
@@ -52,11 +43,11 @@ export class EpubFile {
 	private url?: string;
 	constructor(public path: string, public blob: Blob) {}
 
-	static async fromZipEntry(entry: zip.Entry): Promise<EpubFile> {
+	static async fromZipEntry(entry: Entry): Promise<EpubFile> {
 		if (entry.directory || !entry.getData) {
 			throw new Error("Not a file");
 		}
-		const writer = new zip.BlobWriter();
+		const writer = new BlobWriter();
 		const blob = await entry.getData(writer);
 		const path = entry.filename;
 		return new EpubFile(path, blob);

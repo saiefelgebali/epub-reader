@@ -1,92 +1,60 @@
-import * as zip from "@zip.js/zip.js";
 import { db } from "../db/db";
 import { EpubFile, EpubFileSystem } from "./epub.file.system";
-import { Spine } from "./epub.manifest";
 import { v4 as uuidv4 } from "uuid";
 import { BookEntity } from "../db/book.entity";
+import { BlobReader, Entry, ZipReader } from "@zip.js/zip.js";
+import { EpubOPF } from "./epub.opf";
+
+async function unzip(blob: Blob): Promise<Entry[]> {
+	// unzip the epub
+	const blobReader = new BlobReader(blob);
+	const zipReader = new ZipReader(blobReader);
+	return await zipReader.getEntries();
+}
 
 export class Epub {
 	constructor(
 		public id: string,
 		public file: Blob,
-		public metadata: any,
+		public opf: EpubOPF,
 		public fileSystem: EpubFileSystem,
-		public spine: Spine,
 		public coverImage: EpubFile
 	) {}
 
 	public static async fromBlob(epub: Blob) {
-		// unzip the epub
-		const epubBlob = new zip.BlobReader(epub);
-		const zipReader = new zip.ZipReader(epubBlob);
-		const entries = await zipReader.getEntries();
+		const entries = await unzip(epub);
 
-		// parse files from the epub
 		const fileSystem = await EpubFileSystem.fromZipEntries(entries);
 
 		// find the container file
-		const containerFile = await fileSystem.getFile(
-			"META-INF/container.xml"
-		);
-		const containerDoc = await containerFile.getDocument();
-
-		// find the rootfile
-		const rootfile = containerDoc.querySelector("rootfile");
-		if (!rootfile) throw new Error("Invalid container.xml: No rootfile");
+		const container = await (
+			await fileSystem.getFile("META-INF/container.xml")
+		).getDocument();
 
 		// find the rootfile path
-		const rootfilePath = rootfile.getAttribute("full-path");
+		const rootfilePath = container
+			.querySelector("rootfile")
+			?.getAttribute("full-path");
 		if (!rootfilePath)
 			throw new Error("Invalid container.xml: No rootfile path");
 
-		// find the opf file
+		// parse the opf file
 		const opfFile = await fileSystem.getFile(rootfilePath);
-		const opfDoc = await opfFile.getDocument();
-
-		// extract the spine
-		const spine = Spine.fromDocument(opfDoc);
+		const opf = await EpubOPF.fromDocument(
+			await opfFile.getDocument(),
+			fileSystem
+		);
 
 		// Get the cover image from first spine item
-		const coverPageHref = spine.items[0].href;
-		const coverPageFile = await fileSystem.getFile(coverPageHref);
-		const coverPageDoc = await coverPageFile.getDocument();
+		const coverPage = await opf.spine[0].getDocument();
 		const coverImageSrc =
-			coverPageDoc.querySelector("img")?.getAttribute("src") ||
-			coverPageDoc.querySelector("image")?.getAttribute("xlink:href") ||
-			null;
+			coverPage.querySelector("img")?.getAttribute("src") ||
+			coverPage.querySelector("image")?.getAttribute("xlink:href");
 		if (!coverImageSrc) throw new Error("Could not find cover image src");
 		const coverImage = await fileSystem.getFile(coverImageSrc);
 
-		// Get meta data
-		const metadataEl = opfDoc.querySelector("metadata");
-		if (!metadataEl) throw new Error("Invalid opf: No metadata");
-
-		const metadata = {
-			title:
-				metadataEl.getElementsByTagName("dc:title")[0]?.textContent ||
-				"",
-			author:
-				metadataEl.getElementsByTagName("dc:creator")[0]?.textContent ||
-				"",
-			publisher:
-				metadataEl.getElementsByTagName("dc:publisher")[0]
-					?.textContent || "",
-			date:
-				metadataEl.getElementsByTagName("dc:date")[0]?.textContent ||
-				"",
-			identifier:
-				metadataEl.getElementsByTagName("dc:identifier")[0]
-					?.textContent || "",
-		};
 		const id = uuidv4();
-		const book = new Epub(
-			id,
-			epub,
-			metadata,
-			fileSystem,
-			spine,
-			coverImage
-		);
+		const book = new Epub(id, epub, opf, fileSystem, coverImage);
 
 		// return the entity
 		return book;
@@ -95,7 +63,7 @@ export class Epub {
 	public async save() {
 		const entity: BookEntity = {
 			id: this.id,
-			metadata: this.metadata,
+			metadata: this.opf.metadata,
 			coverImage: {
 				buffer: await this.coverImage.blob.arrayBuffer(),
 				type: this.coverImage.blob.type,
@@ -195,21 +163,17 @@ export class Epub {
 	}
 
 	public async getSpineEntryHTML(index: number): Promise<Node> {
-		const spineItem = this.spine.items[index];
-		if (!spineItem) throw new Error("Invalid spine index");
-
-		const itemPath = spineItem.href;
-
-		const file = await this.fileSystem.getFile(itemPath);
-		const doc = await file.getDocument();
+		const item = this.opf.spine[index];
+		const doc = await item.getDocument();
 
 		// populate images in the element
 		await this.populateDomImages(doc as Document);
 
 		const pageElement = document.createElement("div");
+		pageElement.id = item.path;
 		pageElement.classList.add("chapter");
-		pageElement.id = file.path;
 		pageElement.append(...Array.from(doc.body.childNodes));
+
 		return pageElement;
 	}
 
@@ -218,7 +182,7 @@ export class Epub {
 
 		// Render each sections in the book
 		// Skip the cover page
-		for (let i = 1; i < this.spine.items.length; i++) {
+		for (let i = 1; i < this.opf.spine.length; i++) {
 			const page = await this.getSpineEntryHTML(i);
 			root.appendChild(page);
 		}
@@ -233,10 +197,5 @@ export class Epub {
 		// TODO: update lastRead
 
 		return bookHtml;
-	}
-
-	public async renderTo(element: Node) {
-		const root = await this.getHTMLElement();
-		element.appendChild(root);
 	}
 }

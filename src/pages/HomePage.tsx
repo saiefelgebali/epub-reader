@@ -1,7 +1,7 @@
 import { Link } from "solid-app-router";
-import { Component, For, Suspense } from "solid-js";
+import { Component, For } from "solid-js";
 import { Epub } from "../books/epub";
-import { Book, BookEntity } from "../db/book.entity";
+import { Book } from "../db/book.entity";
 import { db } from "../db/db";
 import { books, setBooks } from "../store";
 
