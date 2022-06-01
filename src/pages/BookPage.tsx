@@ -3,6 +3,7 @@ import { useParams } from "solid-app-router";
 import { createEffect, createSignal, onCleanup } from "solid-js";
 import { Epub } from "../books/epub";
 import Header from "../components/Header";
+import Icon from "../components/Icon";
 import Main from "../components/Main";
 import { Book } from "../db/book.entity";
 import { db } from "../db/db";
@@ -51,49 +52,33 @@ const BookPage = () => {
 
 	const pageScroll = () => {
 		window.scrollBy({
-			top: scroll() * 1,
+			top: scroll(),
 		});
 
-		scrollTimeout = window.setTimeout(pageScroll, 10);
+		scrollTimeout = setTimeout(pageScroll, 10);
 	};
 
-	const startPageScroll = () => {
-		if (scrollTimeout) return;
-		console.log("start scroll");
-		window.addEventListener("pointerdown", pausePageScroll, { once: true });
+	const startScroll = () => {
+		if (!containerRef) return;
+		containerRef.addEventListener("pointerdown", () => setScroll(0), {
+			once: true,
+		});
 		pageScroll();
 	};
 
-	const pausePageScroll = () => {
-		if (!scrollTimeout) return;
-		console.log("pause scroll");
-		window.removeEventListener("pointerdown", pausePageScroll);
-		window.addEventListener("pointerup", startPageScroll, { once: true });
-		stopPageScroll();
-	};
-
-	const stopPageScroll = () => {
-		if (!scrollTimeout) return;
-		console.log("stop scroll");
-		clearInterval(scrollTimeout);
+	const stopScroll = () => {
+		clearTimeout(scrollTimeout);
 		scrollTimeout = undefined;
 	};
 
 	createEffect(() => {
-		if (scroll() > 0 && !scrollTimeout) {
-			startPageScroll();
-		} else if (scroll() === 0 && scrollTimeout) {
-			window.removeEventListener("pointerdown", pausePageScroll);
-			window.removeEventListener("pointerup", startPageScroll);
-			stopPageScroll();
-		}
+		if (scroll() === 0) return stopScroll();
+		else if (!scrollTimeout) startScroll();
 	});
 
 	onCleanup(() => {
-		if (scrollTimeout) clearTimeout(scrollTimeout);
-		console.log("cleanup");
-		window.removeEventListener("pointerdown", pausePageScroll);
-		window.removeEventListener("pointerup", startPageScroll);
+		clearTimeout(scrollTimeout);
+		containerRef?.removeEventListener("pointerdown", () => setScroll(0));
 	});
 
 	return (
@@ -107,16 +92,21 @@ const BookPage = () => {
 				)}
 
 				<div ref={containerRef}></div>
-
-				<button
-					class='h-16 w-16 bg-white dark:bg-background-900 shadow-md fixed bottom-8 right-4 flex items-center justify-center rounded-full select-none cursor-pointer touch-manipulation'
-					onclick={(e) => {
-						e.preventDefault();
-						setScroll((prev) => (prev == 2 ? 0 : prev + 1));
-					}}>
-					{scroll()}
-				</button>
 			</Main>
+			<button
+				class='h-16 w-16 bg-white dark:bg-background-900 shadow-md fixed bottom-8 right-4 flex items-center justify-center rounded-full select-none cursor-pointer touch-manipulation'
+				onclick={(e) => {
+					e.preventDefault();
+					setScroll((prev) => (prev == 2 ? 0 : prev + 1));
+				}}>
+				{scroll() == 0 ? (
+					<Icon icon='play' />
+				) : scroll() == 1 ? (
+					<Icon icon='fastForward' />
+				) : (
+					<Icon icon='pause' />
+				)}
+			</button>
 		</>
 	);
 };
