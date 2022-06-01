@@ -60,7 +60,7 @@ const BookPage = () => {
 
 	const startScroll = () => {
 		if (!containerRef) return;
-		containerRef.addEventListener("pointerdown", () => setScroll(0), {
+		containerRef.addEventListener("touchstart", () => setScroll(0), {
 			once: true,
 		});
 		pageScroll();
@@ -78,7 +78,7 @@ const BookPage = () => {
 
 	onCleanup(() => {
 		clearTimeout(scrollTimeout);
-		containerRef?.removeEventListener("pointerdown", () => setScroll(0));
+		containerRef?.removeEventListener("touchstart", () => setScroll(0));
 	});
 
 	return (
@@ -94,18 +94,20 @@ const BookPage = () => {
 				<div ref={containerRef}></div>
 			</Main>
 			<button
-				class='h-16 w-16 bg-white dark:bg-background-900 shadow-md fixed bottom-8 right-4 flex items-center justify-center rounded-full select-none cursor-pointer touch-manipulation'
+				class='h-32 w-32 fixed bottom-0 right-0 cursor-pointer touch-none flex justify-end items-end'
 				onclick={(e) => {
 					e.preventDefault();
 					setScroll((prev) => (prev == 2 ? 0 : prev + 1));
 				}}>
-				{scroll() == 0 ? (
-					<Icon icon='play' />
-				) : scroll() == 1 ? (
-					<Icon icon='fastForward' />
-				) : (
-					<Icon icon='pause' />
-				)}
+				<div class='h-16 w-16 mr-4 mb-8 bg-white dark:bg-background-900 shadow-md flex items-center justify-center rounded-full select-none'>
+					{scroll() == 0 ? (
+						<Icon icon='play' />
+					) : scroll() == 1 ? (
+						<Icon icon='fastForward' />
+					) : (
+						<Icon icon='pause' />
+					)}
+				</div>
 			</button>
 		</>
 	);
