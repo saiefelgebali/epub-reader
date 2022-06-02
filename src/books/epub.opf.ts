@@ -83,4 +83,6 @@ export class EpubOPF {
 
 		return metadata;
 	}
+
+	static async getCoverImage() {}
 }

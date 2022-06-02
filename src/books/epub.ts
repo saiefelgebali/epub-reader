@@ -1,9 +1,10 @@
 import { db } from "../db/db";
 import { EpubFile, EpubFileSystem } from "./epub.file.system";
 import { v4 as uuidv4 } from "uuid";
-import { BookEntity } from "../db/book.entity";
+import { Book, BookEntity } from "../db/book.entity";
 import { BlobReader, Entry, ZipReader } from "@zip.js/zip.js";
 import { EpubOPF } from "./epub.opf";
+import { setBooks } from "../store";
 
 async function unzip(blob: Blob): Promise<Entry[]> {
 	// unzip the epub
@@ -21,11 +22,29 @@ export class Epub {
 		public coverImage: EpubFile
 	) {}
 
+	public static async fromBook(book: Book) {
+		const fileSystem = await this.getFileSystem(book.file);
+		const opf = await this.getOPF(fileSystem);
+		const coverImage = await this.getCoverImage(opf, fileSystem);
+
+		return new Epub(book.id, book.file, opf, fileSystem, coverImage);
+	}
+
 	public static async fromBlob(epub: Blob) {
+		const fileSystem = await this.getFileSystem(epub);
+		const opf = await this.getOPF(fileSystem);
+		const coverImage = await this.getCoverImage(opf, fileSystem);
+
+		const id = uuidv4();
+		return new Epub(id, epub, opf, fileSystem, coverImage);
+	}
+
+	private static async getFileSystem(epub: Blob): Promise<EpubFileSystem> {
 		const entries = await unzip(epub);
+		return EpubFileSystem.fromZipEntries(entries);
+	}
 
-		const fileSystem = await EpubFileSystem.fromZipEntries(entries);
-
+	private static async getOPF(fileSystem: EpubFileSystem): Promise<EpubOPF> {
 		// find the container file
 		const container = await (
 			await fileSystem.getFile("META-INF/container.xml")
@@ -45,6 +64,13 @@ export class Epub {
 			fileSystem
 		);
 
+		return opf;
+	}
+
+	public static async getCoverImage(
+		opf: EpubOPF,
+		fileSystem: EpubFileSystem
+	) {
 		// Get the cover image from first spine item
 		const coverPage = await opf.spine[0].getDocument();
 		const coverImageSrc =
@@ -53,11 +79,7 @@ export class Epub {
 		if (!coverImageSrc) throw new Error("Could not find cover image src");
 		const coverImage = await fileSystem.getFile(coverImageSrc);
 
-		const id = uuidv4();
-		const book = new Epub(id, epub, opf, fileSystem, coverImage);
-
-		// return the entity
-		return book;
+		return coverImage;
 	}
 
 	public async save() {
@@ -194,7 +216,19 @@ export class Epub {
 		bookHtml.classList.add("book");
 		bookHtml.append(...root.childNodes);
 
-		// TODO: update lastRead
+		// Update lastRead
+		await db.books.update(this.id, {
+			lastRead: new Date(),
+		});
+
+		// update book cache
+		const newBook = await db.books.get(this.id);
+		if (newBook) {
+			setBooks((prev) => ({
+				...prev,
+				[this.id]: Book.fromEntity(newBook),
+			}));
+		}
 
 		return bookHtml;
 	}

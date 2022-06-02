@@ -1,10 +1,11 @@
 Current
-[ ] Refactor code to decouple components (Use book objects in their simplest form)
-[ ] Updating lastRead every time a book is opened
+[X] Refactor code to decouple components (Use book objects in their simplest form)
+[X] Updating lastRead every time a book is opened
 
 Phase 1
-[ ] Save books to IndexedDB database
-[ ] Web workers for book parsing tasks
+[X] Save books to IndexedDB database
+[-] Web workers for book parsing tasks 
+    - Cannot use DOMParser in a web worker
 [ ] Service worker for offline mode
 
 Phase 2

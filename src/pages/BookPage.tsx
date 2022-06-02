@@ -20,7 +20,7 @@ const BookPage = () => {
 	const [scroll, setScroll] = createSignal(0);
 
 	const getBookHTMLElement = async () => {
-		const epub = await Epub.fromBlob(book().file);
+		const epub = await Epub.fromBook(book());
 		return await epub.getHTMLElement();
 	};
 

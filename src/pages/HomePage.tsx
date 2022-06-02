@@ -4,7 +4,6 @@ import { Epub } from "../books/epub";
 import Header from "../components/Header";
 import Main from "../components/Main";
 import { Book } from "../db/book.entity";
-import { db } from "../db/db";
 import { books, setBooks } from "../store";
 
 const BookPreview: Component<{ book: Book }> = ({ book }) => {
@@ -33,6 +32,10 @@ const HomePage = () => {
 		setBooks((prev) => ({ ...prev, [newBook.id]: newBook }));
 	}
 
+	const orderedBooks = Object.values(books()).sort((a, b) =>
+		a.lastRead < b.lastRead ? 1 : -1
+	);
+
 	return (
 		<div>
 			<Header />
@@ -41,7 +44,7 @@ const HomePage = () => {
 				<h1 class='text-4xl font-bold mb-8'>Books</h1>
 
 				<div class='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 items-end'>
-					<For each={Object.values(books())}>
+					<For each={orderedBooks}>
 						{(book) => <BookPreview book={book} />}
 					</For>
 
