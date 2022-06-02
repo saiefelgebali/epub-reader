@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Test Auto-scroll</title>
+	</head>
+	<body>
+		<main style="max-width: 500px; margin: 0 auto; font-size: 32px">
+			<div style="position: sticky; top: 0">
+				<button onclick="startScroll()">Start</button>
+				<button onclick="stopScroll()">Stop</button>
+			</div>
+			<p>
+				Lorem ipsum dolor sit amet consectetur adipisicing elit. Earum
+				ducimus, totam debitis sint modi inventore explicabo iusto
+				assumenda vitae vero porro aperiam aut reiciendis nam culpa quia
+				in, dolor quae.
+			</p>
+			<p>
+				Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+				Impedit sunt vitae saepe recusandae voluptatibus nihil enim,
+				sequi rerum quibusdam nisi provident! Autem aliquid
+				reprehenderit doloremque inventore quasi dolore fugit tempora.
+			</p>
+			<p>
+				Lorem, ipsum dolor sit amet consectetur adipisicing elit. Iure
+				molestias consectetur molestiae labore totam ex et eum nulla
+				officia, minima excepturi voluptates, consequatur amet modi!
+				Molestiae autem illum ullam accusantium.
+			</p>
+			<p>
+				Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+				Quisquam ab ex tenetur a possimus? Cum, nostrum dolor? Veniam
+				tenetur cupiditate, maxime fuga sequi earum excepturi
+				repudiandae, aliquam, laborum blanditiis iusto.
+			</p>
+			<p>
+				Lorem, ipsum dolor sit amet consectetur adipisicing elit. Ipsam,
+				laborum mollitia suscipit dolores omnis, cum perferendis rerum
+				accusantium doloremque quasi pariatur, deserunt delectus et
+				porro nesciunt cumque vel quisquam velit!
+			</p>
+			<p>
+				Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+				Quisquam ab ex tenetur a possimus? Cum, nostrum dolor? Veniam
+				tenetur cupiditate, maxime fuga sequi earum excepturi
+				repudiandae, aliquam, laborum blanditiis iusto.
+			</p>
+			<p>
+				Lorem, ipsum dolor sit amet consectetur adipisicing elit. Ipsam,
+				laborum mollitia suscipit dolores omnis, cum perferendis rerum
+				accusantium doloremque quasi pariatur, deserunt delectus et
+				porro nesciunt cumque vel quisquam velit!
+			</p>
+			<p>
+				Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+				Quisquam ab ex tenetur a possimus? Cum, nostrum dolor? Veniam
+				tenetur cupiditate, maxime fuga sequi earum excepturi
+				repudiandae, aliquam, laborum blanditiis iusto.
+			</p>
+			<p>
+				Lorem, ipsum dolor sit amet consectetur adipisicing elit. Ipsam,
+				laborum mollitia suscipit dolores omnis, cum perferendis rerum
+				accusantium doloremque quasi pariatur, deserunt delectus et
+				porro nesciunt cumque vel quisquam velit!
+			</p>
+		</main>
+		<script>
+			let scrollTimeout;
+
+			function pageScroll() {
+				scrollTimeout = setTimeout(() => {
+					window.scrollBy(0, 1);
+					pageScroll();
+				}, 10);
+			}
+
+			function startScroll() {
+				pageScroll();
+			}
+			function stopScroll() {
+				clearTimeout(scrollTimeout);
+			}
+		</script>
+	</body>
+</html>

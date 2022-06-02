@@ -49,18 +49,25 @@ const BookPage = () => {
 
 	// Control auto scroll
 	let scrollTimeout: number | undefined;
+	let mainElement: HTMLElement | undefined;
 
 	const pageScroll = () => {
 		window.scrollBy({
 			top: scroll(),
 		});
 
-		scrollTimeout = setTimeout(pageScroll, 10);
+		scrollTimeout = setTimeout(pageScroll, 50);
 	};
 
 	const startScroll = () => {
 		if (!containerRef) return;
-		containerRef.addEventListener("touchstart", () => setScroll(0), {
+		mainElement = document.querySelector("main") || undefined;
+		if (!mainElement) return;
+
+		mainElement.addEventListener("pointerdown", () => setScroll(0), {
+			once: true,
+		});
+		mainElement.addEventListener("touchstart", () => setScroll(0), {
 			once: true,
 		});
 		pageScroll();
@@ -78,13 +85,15 @@ const BookPage = () => {
 
 	onCleanup(() => {
 		clearTimeout(scrollTimeout);
-		containerRef?.removeEventListener("touchstart", () => setScroll(0));
+		if (!mainElement) return;
+		mainElement.removeEventListener("pointerdown", () => setScroll(0));
+		mainElement.removeEventListener("touchstart", () => setScroll(0));
 	});
 
 	return (
 		<>
 			<Header />
-			<Main styles='max-w-xl'>
+			<Main styles='max-w-xl mx-auto'>
 				{book() && (
 					<div class=' w-full min-h-screen flex items-center'>
 						<img src={book().coverImageUrl}></img>

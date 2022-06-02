@@ -4,7 +4,11 @@ const Main: Component<ParentProps<{ styles?: string }>> = ({
 	children,
 	styles = "",
 }) => {
-	return <main class={`container mx-auto mt-16 ${styles}`}>{children}</main>;
+	return (
+		<main>
+			<div class={`container mx-auto mt-16 ${styles}`}>{children}</div>
+		</main>
+	);
 };
 
 export default Main;
