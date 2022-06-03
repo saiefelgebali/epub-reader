@@ -4,7 +4,7 @@
 	"version": "0.0.0",
 	"scripts": {
 		"dev": "vite",
-		"dev:tailwind": "tailwindcss -i ./src/index.css -o ./src/styles.css --watch",
+		"dev:tailwind": "tailwindcss -i ./src/css/index.css -o ./src/css/styles.css --watch",
 		"build": "tsc && vite build",
 		"test": "vitest",
 		"preview": "vite preview"

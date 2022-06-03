@@ -1,10 +1,10 @@
 /* @refresh reload */
 import { render } from "solid-js/web";
 
-import "./styles.css";
+import "./css/styles.css";
 import App from "./App";
 
-import "./nprogress.css";
+import "./css/nprogress.css";
 import nProgress from "nprogress";
 
 nProgress.configure({ showSpinner: false });
