@@ -1,18 +1,34 @@
 Phase 0
-[X] Refactor code to decouple components (Use book objects in their simplest form)
-[X] Updating lastRead every time a book is opened
+
+-   [x] Refactor code to decouple components (Use book objects in their simplest form)
+-   [x] Updating lastRead every time a book is opened
 
 Phase 1
-[X] Save books to IndexedDB database
-[-] Web workers for book parsing tasks
-[-] Cannot use DOMParser in a web worker
+
+-   [x] Save books to IndexedDB database
+-   [-] Web workers for book parsing tasks
+    -   [-] Cannot use DOMParser in a web worker
+-   [x] Save last page read in db
 
 Phase 2
-[ ] Only allow epub/pdf files to be uploaded
-[ ] Cache opened book html
-[ ] Split up books into pages
-[ ] Show current page
-[ ] Handle page navigation
-[ ] Save last page read in db
-[ ] Service worker for offline mode
-[ ] Handle PDF files
+
+-   [x] Only allow epub/pdf files to be uploaded
+-   [ ] Cache opened book html
+-   [ ] Settings
+    -   [ ] Font Size
+    -   [x] Theme
+    -   [ ] Scroll Speed
+
+Phase 3
+
+-   [ ] Split up books into pages
+-   [ ] Show current page
+-   [ ] Handle page navigation
+
+Phase 4
+
+-   [ ] Service worker for offline mode
+
+Phase 5
+
+-   [ ] Handle PDF files

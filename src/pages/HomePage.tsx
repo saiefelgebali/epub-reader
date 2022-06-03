@@ -60,6 +60,7 @@ const HomePage = () => {
 							id='input-book'
 							class='hidden'
 							oninput={handleAddBook}
+							accept='application/epub+zip, application/pdf'
 						/>
 					</label>
 				</div>
