@@ -1,7 +1,7 @@
 /* @refresh reload */
 import { render } from "solid-js/web";
 
-import "./css/styles.css";
+import "./css/output.css";
 import App from "./App";
 
 import "./css/nprogress.css";
