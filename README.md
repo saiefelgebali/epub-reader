@@ -1,3 +1,3 @@
 # epub-reader
 
-Read epub files in your browser.
+This is a small PWA that parses .epub files, and saves them using the IndexedDB API.
